@@ -24,9 +24,12 @@ def get_html(url):
     return r.text  # Return html page code
 
 
-def make_timetable(teacher):
-    begin_date = datetime.strptime('01.09.2020', '%d.%m.%Y')
-    end_date = datetime.strptime('01.01.2021', '%d.%m.%Y')
+def make_timetable(teacher, date1, date2):
+
+    begin_date = datetime.strptime(date1, '%Y-%m-%d')
+    end_date = datetime.strptime(date2, '%Y-%m-%d')
+    if end_date < begin_date:
+        return ''
     rssu_url = 'https://rgsu.net/for-students/timetable/timetable.html?template=&action=index&admin_mode=&nc_ctpl=935&Teacher='
     rssu_url += teacher
     html = get_html(rssu_url)
@@ -99,5 +102,5 @@ def make_timetable(teacher):
         writer.writerow(['Start Date', 'Start Time', 'End Date', 'End Time', 'Location', 'Description', 'Subject'])
         writer.writerows(datalines)
     print('=' * 80)
-    print(f'OK! Timetable was done - see file [{f_name}] in this directory.\nImport it to your Google Calendar.')
+    print(f'OK! Timetable was done - see file [{f_name}]')
     return f_name

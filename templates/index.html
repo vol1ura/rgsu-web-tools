@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type= "text/css" href="/static/main.css">
-    <link rel="icon" href="../static/favicon.ico">
+    <link href="/static/main.css" rel="stylesheet" type="text/css">
+    <link href="/static/favicon.ico" rel="icon">
     <title>Расписание преподавателя РГСУ</title>
 </head>
 <body>
@@ -18,44 +18,65 @@
 
     <div class="divTableBody">
 
-    <div class="divTableRow">
-        <div class="divTableCell">
-        Программа генерирует csv файл, который легко импортируется в Google календарь через настройки
+        <div class="divTableRow">
+            <div class="divTableCell">
+                Программа генерирует csv файл, который легко импортируется в Google календарь через настройки.
+                Данные запрашиваются с <a href="https://rgsu.net/">официального сайта РГСУ</a>.
+            </div>
         </div>
-    </div>
 
-    <div class="divTableRow">
-        <div class="divTableCell">
-            Выберите преподавателя
+        <div class="divTableRow">
+            <div class="divTableCell">
                 <form action="" method="post">
-                    <label>
-                        <select name="teacher">
-                            <option> -- выбрать -- </option>
+                    <p><label for="teacher">Выберите преподавателя </label>
+                        <select id="teacher" name="teacher" required>
+                            <option disabled selected> -- выбрать --</option>
                             {% for teacher in teachers %}
-                                <option value="{{ teacher }}">{{ teacher }}</option>
+                            <option value="{{ teacher }}">{{ teacher }}</option>
                             {% endfor %}
-                        </select>
-                    </label>
+                        </select></p>
+                    <p><label for="date1">Начальная дата: </label><input required type="date" id="date1" name="date1"/></p>
+                    <p><label for="date2">Конечная дата: </label><input required type="date" id="date2" name="date2"/></p>
                     <button onclick="submit()">Сгенерировать</button>
                 </form>
+            </div>
         </div>
-    </div>
 
-    {% if request.method == 'POST' %}
-    <div class="divTableRow">
-        <div class="divTableCell">
-
-            <p>Расписание получено. <a href="{{ file }}">Скачать файл.</a></p>
-
+        {% if request.method == 'POST' %}
+        <div class="divTableRow">
+            <div class="divTableCell">
+                <h2>Расписание получено.</h2>
+                <p><a href="{{ file }}">Скачать файл.</a></p>
+                <h2>Что дальше?</h2>
+                <ol>
+                    <li>Сохранить файл на своём компьютере. Это простой текстовый файл с записями из расписания. При
+                        желании его можно просматривать и редактировать в любом текстовом редакторе вроде Notepad,
+                        либо открыть через Excel.
+                    </li>
+                    <li>В Google календаре перейти в настройки (шестерёнка) -> Импорт и экспорт -> Выбрать csv файл и
+                        нужный календарь (см. скриншоты) -> Импорт
+                        <p><img alt="Import process"
+                                src="https://raw.githubusercontent.com/vol1ura/rgsu_timetable/master/pics/example0.png" width="40%"></p>
+                    </li>
+                    <li>В результате в вашем Google календаре отобразятся все записи из расписания
+                        <p style="align-content: center"><img
+                                alt="Result"
+                                src="https://raw.githubusercontent.com/vol1ura/rgsu_timetable/master/pics/example2.png" width="40%"></p>
+                    </li>
+                </ol>
+            </div>
         </div>
-    </div>
-    {% endif %}
+        {% endif %}
 
-    <div class="divTableRow">
-        <div class="divTableCell">cell1_4</div>
-    </div>
+        <div class="divTableRow">
+            <div class="divTableCell">
+                <p>
 
-</div>
+                </p>
+            </div>
+        </div>
+
+    </div>
 </div>
 </body>
 </html>

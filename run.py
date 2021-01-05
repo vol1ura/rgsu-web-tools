@@ -10,9 +10,7 @@ app = Flask(__name__)
 def index():
     file = ''
     if request.method == 'POST':
-        teacher = request.form.get('teacher')
-        file = make_timetable(teacher)
-        print(file)
+        file = make_timetable(request.form['teacher'], request.form['date1'], request.form['date2'])
     return render_template('index.html', teachers=get_teachers(), file='/' + file)
 
 
