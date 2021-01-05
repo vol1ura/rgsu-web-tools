@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    {% block head %}
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="/static/main.css">
+    <link rel="icon" href="/static/favicon.ico">
+    <title>{% block title %}{% endblock %}</title>
+    {% endblock %}
+</head>
+<body>
+<div class="divTable blueTable">
+    <div class="divTableHeading">
+        <div class="divTableRow">
+            <div class="divTableHead">{% block header %}{% endblock %}</div>
+        </div>
+    </div>
+    <div class="divTableBody">
+        <div class="divTableRow">
+            <div class="divTableCell">{% block content %}{% endblock %}</div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

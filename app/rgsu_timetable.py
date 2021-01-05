@@ -3,6 +3,7 @@
 # Parsing teacher's timetable on SDO.RSSU.NET
 # ==================== Version 1.4 ===========================================
 from bs4 import BeautifulSoup
+from collections import namedtuple
 import csv
 from datetime import datetime, timedelta
 from lxml.html import parse
@@ -25,29 +26,25 @@ def get_html(url):
 
 
 def make_timetable(teacher, date1, date2):
-
+    Result = namedtuple('Result', 'code file pair_num days_num')
     begin_date = datetime.strptime(date1, '%Y-%m-%d')
     end_date = datetime.strptime(date2, '%Y-%m-%d')
     if end_date < begin_date:
-        return ''
-    rssu_url = 'https://rgsu.net/for-students/timetable/timetable.html?template=&action=index&admin_mode=&nc_ctpl=935&Teacher='
-    rssu_url += teacher
+        return Result(1, '', None, None)
+
+    rssu_url = 'https://rgsu.net/for-students/timetable/timetable.html' + \
+               '?template=&action=index&admin_mode=&nc_ctpl=935&Teacher=' + teacher
     html = get_html(rssu_url)
-
     soup = BeautifulSoup(html, 'html.parser')
-
     trs = soup.find('div', class_="row collapse").find_all('tr')
 
-    date_sett = []
-    while begin_date <= end_date:
-        date_sett.append(begin_date.strftime("%d.%m.%y"))
-        begin_date += timedelta(1)
+    dates_interval = [(begin_date + timedelta(i)).strftime("%d.%m.%y") for i in range((end_date-begin_date).days + 1)]
 
     data = []
     for tr in trs[1:]:
         cells = tr.find_all('td')
         dates = re.findall(r'\d{2}\.\d{2}\.\d{2}', cells[3].text)
-        dates = list(set(date_sett).intersection(set(dates)))
+        dates = list(set(dates_interval).intersection(set(dates)))
         if len(dates) > 0:
             discipline = re.findall(r'[а-яА-ЯёЁ -]+', cells[3].text)[0].strip()
             if len(discipline) > 16:
@@ -63,8 +60,7 @@ def make_timetable(teacher, date1, date2):
                 lesson_type_s = lesson_type
             location = cells[5].text.strip()
             group = cells[6].text.strip()
-            p = re.compile(r'\d+')
-            hmhm = p.findall(cells[1].text.strip())
+            hmhm = re.findall(r'\d+', cells[1].text.strip())
             lesson_time = ['', '']
             try:
                 for i in range(2):
@@ -92,15 +88,11 @@ def make_timetable(teacher, date1, date2):
             datalines.append([data[i][0], data[i][1], data[i][0], data[i][2], data[i][3],
                               data[i][4] + ': ' + data[i][5] + ', ' + data[i][6], data[i][7]])
 
-    print(f'Load in selected period equals {2 * len(datalines)} hours. '
-          f'It is {7 * 2 * len(datalines) / max(1, len(date_sett)):.1f} hours per week in average.')
-
     f_name = 'static/csv/calendar_' + teacher + '.csv'
     f = open(f_name, 'w', newline='', encoding='utf8')
     with f:
         writer = csv.writer(f)
         writer.writerow(['Start Date', 'Start Time', 'End Date', 'End Time', 'Location', 'Description', 'Subject'])
         writer.writerows(datalines)
-    print('=' * 80)
     print(f'OK! Timetable was done - see file [{f_name}]')
-    return f_name
+    return Result(0, f_name, len(datalines), len(dates_interval))

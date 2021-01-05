@@ -1,26 +1,7 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="/static/main.css">
-    <link rel="icon" href="../static/favicon.ico">
-    <title>Ошибка 404</title>
-</head>
-<body>
-<div class="divTable blueTable">
-    <div class="divTableHeading">
-        <div class="divTableRow">
-            <div class="divTableHead">Ошибка 404</div>
-        </div>
-    </div>
-    <div class="divTableBody">
-        <div class="divTableRow">
-            <div class="divTableCell">Запрашиваемая страница отсутствует на сервере</div>
-        </div>
-        <div class="divTableRow">
-            <div class="divTableCell"><a href="{{ url_for('index') }}">Вернуться на главную страницу</a></div>
-        </div>
-    </div>
-</div>
-</body>
-</html>
+{% extends "template.html" %}
+{% block title %}Ошибка 404{% endblock %}
+{% block header %}Ошибка 404{% endblock %}
+{% block content %}
+<p>Запрашиваемая страница отсутствует на сервере.</p>
+<p><a href="{{ url_for('index') }}">Вернуться на главную страницу</a>.</p>
+{% endblock %}
