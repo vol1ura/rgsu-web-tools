@@ -3,7 +3,6 @@ from flask import Flask
 from flask import render_template, request, make_response, url_for, session
 from app.rgsu_timetable import make_timetable, get_teachers
 
-# создание экземпляра приложения
 app = Flask(__name__)
 
 
@@ -23,4 +22,4 @@ def http_404_handler():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()  # debug=True
