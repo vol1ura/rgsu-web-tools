@@ -2,12 +2,12 @@
 # Volodin Yuriy (volodinjuv@rgsu.net), 2020
 # Parsing teacher's timetable on SDO.RSSU.NET
 # ==================== Version 1.4 ===========================================
-from bs4 import BeautifulSoup  # Install it if you need: pip3 install bs4
-import csv                    # Install it if you need: pip3 install csv
+from bs4 import BeautifulSoup
+import csv
 from datetime import datetime, timedelta
 from lxml.html import parse
 import re
-import requests               # Install it if you need: pip3 install requests
+import requests
 
 
 def get_teachers():
