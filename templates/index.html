@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type= "text/css" href="/static/main.css">
+    <link rel="icon" href="../static/favicon.ico">
+    <title>Расписание преподавателя РГСУ</title>
+</head>
+<body>
+
+<div class="divTable blueTable">
+
+    <div class="divTableHeading">
+        <div class="divTableRow">
+            <div class="divTableHead">Календарь занятий преподавателя РГСУ</div>
+        </div>
+    </div>
+
+    <div class="divTableBody">
+
+    <div class="divTableRow">
+        <div class="divTableCell">
+        Программа генерирует csv файл, который легко импортируется в Google календарь через настройки
+        </div>
+    </div>
+
+    <div class="divTableRow">
+        <div class="divTableCell">
+            Выберите преподавателя
+                <form action="" method="post">
+                    <label>
+                        <select name="teacher">
+                            <option> -- выбрать -- </option>
+                            {% for teacher in teachers %}
+                                <option value="{{ teacher }}">{{ teacher }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <button onclick="submit()">Сгенерировать</button>
+                </form>
+        </div>
+    </div>
+
+    {% if request.method == 'POST' %}
+    <div class="divTableRow">
+        <div class="divTableCell">
+
+            <p>Расписание получено. <a href="{{ file }}">Скачать файл.</a></p>
+
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="divTableRow">
+        <div class="divTableCell">cell1_4</div>
+    </div>
+
+</div>
+</div>
+</body>
+</html>
