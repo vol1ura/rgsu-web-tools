@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Volodin Yuriy (volodinjuv@rgsu.net), 2020
 # Parsing teacher's timetable on SDO.RSSU.NET
-# ==================== Version 1.4 ===========================================
+# ==================== Version 1.5 ===========================================
 from bs4 import BeautifulSoup
 from collections import namedtuple
 import csv
@@ -18,11 +18,7 @@ def get_teachers():
     return tree.xpath('//select[@id="teacher"]/option/@value')[1:]
 
 
-def get_html(url):
-    r = requests.get(url)  # Response
-    if r.status_code != 200:
-        print("Can't get page. Check connection to rgsu.net and try to restart this script.")
-    return r.text  # Return html page code
+WEEKDAYS = {'Понедельник': 1, 'Вторник': 2, 'Среда': 3, 'Четверг': 4, 'Пятница': 5, 'Суббота': 6}
 
 
 def make_timetable(teacher, date1, date2):
@@ -32,20 +28,41 @@ def make_timetable(teacher, date1, date2):
     if end_date < begin_date:
         return Result(1, '', None, None)
 
-    rssu_url = 'https://rgsu.net/for-students/timetable/timetable.html' + \
-               '?template=&action=index&admin_mode=&nc_ctpl=935&Teacher=' + teacher
-    html = get_html(rssu_url)
-    soup = BeautifulSoup(html, 'html.parser')
+    payload = {'template': '', 'action': 'index', 'admin_mode': '', 'nc_ctpl': 935, 'Teacher': teacher}
+    rssu_url = 'https://rgsu.net/for-students/timetable/timetable.html'
+    timetable = requests.get(rssu_url, params=payload)
+    if not timetable.ok:
+        return Result(1, '', None, None)
+
+    soup = BeautifulSoup(timetable.text, 'html.parser')
+
     trs = soup.find('div', class_="row collapse").find_all('tr')
 
-    dates_interval = [(begin_date + timedelta(i)).strftime("%d.%m.%y") for i in range((end_date-begin_date).days + 1)]
+    date_now = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    while date_now.isoweekday() != 1:
+        date_now -= timedelta(1)  # step back to monday
+    if "Нечетная" in soup.find('div', class_="panel-green").find('p', class_="heading").text:
+        date_now += timedelta(7)  # change week to synchronize oddness
+    # Sunday belongs to next week on this site
+    # if datetime.now().isoweekday() == 7:
+    #     date_now -= timedelta(7)  # change week to correct oddness in sunday
+
+    date_range = [begin_date + timedelta(i) for i in range((end_date - begin_date).days + 1)]
 
     data = []
     for tr in trs[1:]:
         cells = tr.find_all('td')
         dates = re.findall(r'\d{2}\.\d{2}\.\d{2}', cells[3].text)
-        dates = list(set(dates_interval).intersection(set(dates)))
-        if len(dates) > 0:
+        if dates:
+            date_range_str = [date.strftime("%d.%m.%y") for date in date_range]
+            dates = list(set(date_range_str).intersection(set(dates)))
+        else:
+            weekday = WEEKDAYS[cells[0].text.strip()]
+            week = 0 if 'Четная' in cells[2].text else 1
+            dates = [date.strftime("%d.%m.%y") for date in date_range
+                     if (date.isoweekday() == weekday) and ((date - date_now).days // 7 % 2 == week)]
+
+        if dates:
             discipline = re.findall(r'[а-яА-ЯёЁ -]+', cells[3].text)[0].strip()
             if len(discipline) > 16:
                 discipline_s = ''.join([(w if len(w) == 1 else w[0].upper()) for w in discipline.split(' ')])
@@ -60,14 +77,10 @@ def make_timetable(teacher, date1, date2):
                 lesson_type_s = lesson_type
             location = cells[5].text.strip()
             group = cells[6].text.strip()
-            hmhm = re.findall(r'\d+', cells[1].text.strip())
-            lesson_time = ['', '']
-            try:
-                for i in range(2):
-                    lesson_time[i] += hmhm[2*i]+':'+hmhm[1 + 2*i]
-            except:
-                print(f'Bad time format: [ {cells[1].text} ]')
-                print('See timetable and manually correct time for:', cells[0].text, cells[2].text, group)
+            lesson_time = re.findall(r'\d{1,2}:\d{2}', cells[1].text)
+            if len(lesson_time) != 2:
+                print(f'Bad time format: [ {cells[1].text} ].\n'
+                      'See timetable and manually correct time for:', cells[0].text, cells[2].text, group)
                 lesson_time = ['8:00', '22:00']
 
             for date in dates:
@@ -95,4 +108,4 @@ def make_timetable(teacher, date1, date2):
         writer.writerow(['Start Date', 'Start Time', 'End Date', 'End Time', 'Location', 'Description', 'Subject'])
         writer.writerows(datalines)
     print(f'OK! Timetable was done - see file [{f_name}]')
-    return Result(0, f_name, len(datalines), len(dates_interval))
+    return Result(0, f_name, len(datalines), len(date_range))
