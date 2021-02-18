@@ -6,4 +6,4 @@
 ## Расписание занятий
 После импорта `csv` файла в Google календарь, получаем отображение всех записей из расписания и автоматические напоминания за 1 час (по умолчанию).
 
-![Google calendar on Android](pics/pic1.png)![Event on Android](pics/pic2.png)
+<img src="pics/pic1.png" width="260"> <img src="pics/pic2.png" width="260">
