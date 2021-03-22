@@ -7,3 +7,11 @@
 После импорта `csv` файла в Google календарь, получаем отображение всех записей из расписания и автоматические напоминания за 1 час (по умолчанию).
 
 <img src="pics/pic1.png" width="260"> <img src="pics/pic2.png" width="260">
+
+## Запуск приложения
+
+Приложение можно развернуть автоматически с помощью с помощью Docker
+```bash
+docker pull vol1ura/rgsu_timetable
+docker run --rm -p 5000:5000 vol1ura/rgsu_timetable
+```
